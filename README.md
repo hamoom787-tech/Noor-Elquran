@@ -1,3 +1,14 @@
+---
+title: Noor Elquran
+emoji: 🕌
+colorFrom: yellow
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # 🎥 مولد فيديوهات القرآن الكريم - Quran Reels Video Generator
 
 تطبيق ويب محلي لتوليد فيديوهات قصيرة (ريلز) لآيات القرآن الكريم مع خلفية طبيعية وصوت التلاوة والنص العربي.

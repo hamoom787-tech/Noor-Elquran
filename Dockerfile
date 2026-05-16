@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-noto-extra \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY requirements.deploy.txt .
+RUN pip install --upgrade pip && pip install -r requirements.deploy.txt
 
 COPY . .
 RUN mkdir -p audio outputs data background_audio vision

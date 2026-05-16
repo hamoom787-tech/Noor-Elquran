@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noor Studio - Quran Reels Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #08080c;
+            --sidebar-bg: #0d0d12;
+            --surface: #12121a;
+            --surface-light: #1c1c26;
+            --surface-border: #2a2a36;
+            --primary: #f2ca4b;
+            --primary-glow: rgba(242, 202, 75, 0.4);
+            --secondary: #9d7dfa;
+            --text-main: #f5f5f5;
+            --text-muted: #9aa0a6;
+            --danger: #ef4444;
+            --success: #10b981;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glass: rgba(28, 28, 38, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(242, 202, 75, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(157, 125, 250, 0.05) 0%, transparent 40%);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-left: 1px solid var(--surface-border);
+            display: flex;
+            flex-direction: column;
+            padding: 2.5rem 0;
+            z-index: 100;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .logo {
+            padding: 0 2rem;
+            margin-bottom: 3.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+        .logo i { 
+            font-size: 2.2rem;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            transform: translateX(-5px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(242, 202, 75, 0.15), rgba(242, 202, 75, 0.05));
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .nav-link i { font-size: 1.3rem; width: 24px; text-align: center; }
+
+        /* Main Content */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            height: 80px;
+            padding: 0 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 28px;
+            background: rgba(8, 8, 12, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--surface-border);
+            z-index: 90;
+        }
+
+        .header-icon {
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+        .header-icon:hover { color: var(--primary); transform: scale(1.1); }
+        .header-icon.badge::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid var(--bg-dark);
+        }
+
+        .profile-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: var(--surface-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            cursor: pointer;
+            border: 1px solid var(--surface-border);
+            transition: var(--transition);
+        }
+        .profile-btn:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(400px, 40%) 1fr;
+            gap: 2.5rem;
+            height: calc(100vh - 100px);
+        }
+
+        .editor-section {
+            overflow-y: auto;
+            padding-right: 12px;
+            mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 20px), transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 20px), transparent);
+            padding-top: 10px;
+            padding-bottom: 30px;
+            min-height: 0; /* Important for grid scrolling */
+        }
+        
+        /* Custom Scrollbar for Editor Section */
+        .editor-section::-webkit-scrollbar {
+            width: 6px;
+        }
+        .editor-section::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .editor-section::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .editor-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(242, 202, 75, 0.5);
+        }
+
+        .page-info {
+            margin-bottom: 2.5rem;
+        }
+        .page-info h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-info p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* Card Section */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 24px;
+            padding: 1.8rem;
+            margin-bottom: 1.8rem;
+            transition: var(--transition);
+            position: relative;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--surface-border), transparent);
+        }
+        .card:hover {
+            border-color: rgba(242, 202, 75, 0.3);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.8rem;
+        }
+        
+        .title-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .card-title i { font-size: 1.1rem; }
+
+        .btn-random-action {
+            padding: 6px 12px;
+            background: rgba(242, 202, 75, 0.1);
+            border: 1px solid rgba(242, 202, 75, 0.2);
+            border-radius: 8px;
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-random-action:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+        }
+
+        /* Reciters List */
+        .reciters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 5px;
+            margin-right: -5px;
+        }
+
+        .reciter-card {
+            background: var(--surface-light);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .reciter-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+
+        .avatar-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            padding: 2px;
+            border: 2px solid transparent;
+            transition: var(--transition);
+            position: relative;
+            background: var(--surface-light);
+            overflow: hidden;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 14px;
+            object-fit: cover;
+            filter: grayscale(20%);
+            transition: var(--transition);
+        }
+
+        .reciter-card span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .reciter-card.active .avatar-container {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+        .reciter-card.active .avatar-img { filter: grayscale(0%); }
+        .reciter-card.active span { color: var(--primary); font-weight: 800; }
+
+        .preview-mini-btn {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            opacity: 0;
+            transition: var(--transition);
+            backdrop-filter: blur(2px);
+        }
+
+        .reciter-card:hover .preview-mini-btn { opacity: 1; }
+
+        .preview-mini-btn.playing {
+            background: rgba(16, 185, 129, 0.6);
+            opacity: 1;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .label-text {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .input-box {
+            width: 100%;
+            background: var(--bg-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .input-box:focus {
+            border-color: var(--primary);
+            background: rgba(242, 202, 75, 0.03);
+            box-shadow: 0 0 0 4px rgba(242, 202, 75, 0.05);
+        }
+
+        .select-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        /* Custom Dropdown */
+        .custom-select { position: relative; }
+        .dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface-light);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+        }
+        .dropdown-list.show { display: block; animation: slideDown 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+
+        .dropdown-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dropdown-item span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dropdown-item:hover { background: rgba(242, 202, 75, 0.1); color: var(--primary); padding-right: 25px; }
+        .dropdown-item .ayah-count { 
+            font-size: 0.75rem; 
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* Thumbnails Grid */
+        .thumb-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .thumb-item {
+            aspect-ratio: 16/9;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+            background: var(--surface-light);
+            transition: var(--transition);
+        }
+
+        .thumb-item video, .thumb-item .thumb-placeholder {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .thumb-item:hover video { transform: scale(1.1); }
+
+        .thumb-item.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .verse-bg-panel {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+        }
+        .verse-bg-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+        .verse-bg-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+        }
+        .verse-bg-slot {
+            border: 1px solid var(--surface-border);
+            background: var(--bg-dark);
+            border-radius: 10px;
+            padding: 9px;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 58px;
+        }
+        .verse-bg-slot.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(242, 202, 75, 0.16);
+        }
+        .verse-bg-slot.filled .verse-bg-name { color: var(--text-main); }
+        .verse-bg-label {
+            display: block;
+            color: var(--primary);
+            font-size: 0.72rem;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+        .verse-bg-name {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            line-height: 1.35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .thumb-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .thumb-item:hover .thumb-overlay, .thumb-item.active .thumb-overlay { opacity: 1; }
+        .thumb-overlay i { font-size: 1.5rem; color: var(--primary); margin-bottom: 5px; }
+        .thumb-overlay span { font-size: 0.65rem; color: white; font-weight: 700; text-align: center; padding: 0 5px; }
+
+        .btn-show-all {
+            grid-column: span 3;
+            padding: 12px;
+            background: var(--surface-light);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+        .btn-show-all:hover { color: var(--primary); border-color: var(--primary); }
+
+        /* Format Selector */
+        .format-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+            gap: 10px;
+        }
+
+        .format-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .format-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--surface-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .format-info { display: flex; flex-direction: column; align-items: center; }
+        .format-name { font-size: 0.95rem; font-weight: 800; }
+        .format-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; }
+
+        .format-card.active {
+            border-color: var(--primary);
+            background: rgba(242, 202, 75, 0.05);
+            box-shadow: 0 8px 20px rgba(242, 202, 75, 0.1);
+        }
+        .format-card.active .format-icon { background: var(--primary); color: var(--bg-dark); }
+
+        /* Volume Slider */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+        .volume-control i { color: var(--text-muted); font-size: 1rem; }
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 4px;
+            background: var(--surface-light);
+            border-radius: 2px;
+            outline: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Generate Button */
+        .generate-btn {
+            width: 100%;
+            padding: 1.4rem;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #e5b938);
+            color: #000;
+            font-size: 1.2rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 15px 35px rgba(242, 202, 75, 0.3);
+            transition: var(--transition);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+        .generate-btn:hover:not(:disabled)::after { left: 100%; }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 45px rgba(242, 202, 75, 0.4);
+        }
+
+        .generate-btn:active { transform: translateY(-2px); }
+        .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: grayscale(1); }
+
+        .actions-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .secondary-btn {
+            padding: 14px;
+            background: var(--surface-light);
+            color: var(--text-main);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .secondary-btn:hover { background: var(--surface); border-color: var(--text-muted); }
+
+        .clean-btn {
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.05);
+        }
+        .clean-btn:hover { background: rgba(239, 68, 68, 0.1); border-color: var(--danger); }
+
+        /* Preview Column */
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            min-height: 0; /* Important for grid scrolling */
+        }
+
+        .preview-card {
+            flex: 1;
+            background: var(--surface);
+            border-radius: 32px;
+            border: 1px solid var(--surface-border);
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+
+        .preview-card::-webkit-scrollbar {
+            width: 6px;
+        }
+        .preview-card::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+        }
+        .preview-card::-webkit-scrollbar-thumb:hover {
+            background: rgba(242, 202, 75, 0.55);
+        }
+
+        .preview-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--surface-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+            position: sticky;
+            top: 0;
+            z-index: 15;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 14px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 100px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .preview-controls { display: flex; gap: 20px; color: var(--text-muted); font-size: 1.1rem; }
+        .preview-controls i { cursor: pointer; transition: 0.2s; }
+        .preview-controls i:hover { color: var(--primary); }
+
+        .video-viewport {
+            flex: 1;
+            min-height: 520px;
+            background: var(--surface-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            padding: 20px;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.02) 2px, transparent 2px);
+            background-size: 20px 20px;
+        }
+
+        .aspect-ratio-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .aspect-ratio-container.format-portrait { aspect-ratio: 9/16; }
+        .aspect-ratio-container.format-square { aspect-ratio: 1/1; }
+        .aspect-ratio-container.format-landscape { aspect-ratio: 16/9; }
+        .aspect-ratio-container.format-youtube_shorts,
+        .aspect-ratio-container.format-instagram_reels,
+        .aspect-ratio-container.format-tiktok { aspect-ratio: 9/16; }
+        .aspect-ratio-container.format-youtube_landscape { aspect-ratio: 16/9; }
+
+        .empty-preview {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+        .empty-preview i { font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.2; }
+        .empty-preview p { font-size: 1.1rem; max-width: 300px; margin: 0 auto; opacity: 0.5; }
+
+        .result-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            z-index: 10;
+        }
+        .result-video.active { display: block; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Progress Overlay */
+        .progress-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            padding: 3rem;
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--surface-border);
+            display: none;
+            z-index: 50;
+        }
+        .progress-overlay.active { display: block; animation: slideUp 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.1rem; font-weight: 800; }
+        .progress-bar-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 100px; overflow: hidden; margin-bottom: 10px; }
+        .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); box-shadow: 0 0 20px var(--primary-glow); transition: width 0.4s ease; }
+
+        .seo-card {
+            margin-top: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 18px;
+            padding: 1rem;
+        }
+        .seo-card.hidden { display: none; }
+        .seo-row { margin-bottom: 0.9rem; }
+        .seo-row:last-child { margin-bottom: 0; }
+        .seo-row label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .seo-value {
+            background: var(--bg-dark);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.86rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .seo-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 0.8rem;
+        }
+        .seo-btn {
+            border: 1px solid var(--surface-border);
+            background: var(--surface-light);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 0.76rem;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+        .seo-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Modal Backgrounds */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .modal.show { display: flex; animation: fadeIn 0.3s ease; }
+        
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 32px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+        }
+        
+        .modal-header {
+            padding: 1.8rem 2.5rem;
+            border-bottom: 1px solid var(--surface-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 { font-size: 1.5rem; font-weight: 900; }
+        .close-modal { font-size: 1.5rem; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+        .close-modal:hover { color: var(--danger); }
+        
+        .modal-body {
+            flex: 1;
+            padding: 2.5rem;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .all-visuals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-grid { 
+                grid-template-columns: 1fr; 
+                height: auto; 
+                gap: 2rem;
+            }
+            .editor-section { 
+                padding-right: 0; 
+                mask-image: none; 
+                -webkit-mask-image: none; 
+                height: auto;
+                overflow-y: visible;
+                padding-bottom: 0;
+            }
+            body { overflow: auto; height: auto; min-height: 100vh; }
+            .main-wrapper { overflow: visible; }
+            .preview-section {
+                position: relative;
+                top: 0;
+                height: auto;
+                margin-bottom: 2rem;
+            }
+            .video-viewport {
+                max-width: 500px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { 
+                width: 100%; 
+                height: auto; 
+                flex-direction: row; 
+                padding: 1rem; 
+                align-items: center;
+                justify-content: space-between;
+                border-left: none;
+                border-bottom: 1px solid var(--surface-border);
+                box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+                position: sticky;
+                top: 0;
+            }
+            .logo { margin-bottom: 0; padding: 0; font-size: 1.3rem; }
+            .logo i { font-size: 1.8rem; }
+            .nav-menu { flex-direction: row; padding: 0; gap: 5px; }
+            .nav-link { padding: 10px; border-radius: 12px; }
+            .nav-link span { display: none; }
+            .nav-link.active { border-right: none; border-bottom: 3px solid var(--primary); background: rgba(242, 202, 75, 0.1); }
+            
+            .content-grid { gap: 1.5rem; padding: 1rem; }
+            
+            .page-info h1 { font-size: 1.8rem; }
+            .card { padding: 1.2rem; margin-bottom: 1.2rem; border-radius: 16px; }
+            .card-title { flex-direction: column; align-items: flex-start; gap: 10px; }
+            
+            .select-row { grid-template-columns: 1fr; gap: 1rem; }
+            .thumb-grid { grid-template-columns: repeat(2, 1fr); }
+            .btn-show-all { grid-column: span 2; }
+            
+            .actions-row { flex-direction: column; gap: 10px; }
+            
+            .modal-content { max-height: 90vh; border-radius: 20px; }
+            .modal-header { padding: 1.5rem; }
+            .modal-body { padding: 1.5rem; }
+            .all-visuals-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .logo span { display: none; }
+            .format-row { grid-template-columns: 1fr; }
+        }
+
+        /* Alert System */
+        .alert-box {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            padding: 16px 32px;
+            border-radius: 20px;
+            z-index: 100000;
+            transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 800;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+        .alert-box.show { transform: translateX(-50%) translateY(0); }
+        .alert-success { background: rgba(16, 185, 129, 0.9); color: white; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .alert-error { background: rgba(239, 68, 68, 0.9); color: white; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .alert-info { background: rgba(242, 202, 75, 0.9); color: #000; border: 1px solid rgba(242, 202, 75, 0.3); }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 4px solid rgba(0,0,0,0.1);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* View Sections */
+        .view-section {
+            display: none;
+            height: 100%;
+        }
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-mosque"></i>
+            <span>Noor Studio</span>
+        </div>
+        <nav class="nav-menu">
+            <a href="#" class="nav-link active" data-view="studio">
+                <i class="fas fa-magic"></i>
+                <span>Studio</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <main class="main-wrapper">
+        <header style="display: none;">
+            <!-- Header elements removed -->
+        </header>
+
+        <!-- View: Studio -->
+        <div class="view-section active" id="view-studio">
+            <div class="content-grid">
+                <!-- Left Panel: Editor -->
+            <div class="editor-section">
+                <div class="page-info">
+                    <h1>Quran Reels Studio</h1>
+                    <p>أنشئ فيديوهات قرآنية احترافية بلمسات فنية وتكنولوجيا ذكية في ثوانٍ معدودة.</p>
+                </div>
+
+                <form id="generatorForm">
+                    <!-- Section: Reciter -->
+                    <div class="card">
+                        <div class="card-title">
+                            <div class="title-left">
+                                <i class="fas fa-microphone-lines"></i>
+                                <span>القارئ</span>
+                            </div>
+                        </div>
+                        <div class="reciters-grid" id="recitersList">
+                            <!-- JS populated -->
+                            <p style="color: var(--text-muted); font-size: 0.8rem;">جاري تحميل القراء...</p>
+                        </div>
+                    </div>
+
+                    <!-- Section: Scripture -->
+                    <div class="card">
+                        <div class="card-title">
+                            <div class="title-left">
+                                <i class="fas fa-book-quran"></i>
+                                <span>السورة والآيات</span>
+                            </div>
+                            <button type="button" class="btn-random-action" id="randomScriptureBtn">
+                                <i class="fas fa-dice"></i>
+                                <span>اختيار عشوائي</span>
+                            </button>
+                        </div>
+                        
+                        <div class="form-group custom-select" id="surahSelectContainer">
+                            <label class="label-text">السورة</label>
+                            <div style="position:relative">
+                                <input type="text" id="surahSearch" class="input-box" placeholder="ابحث عن سورة (مثلاً: الفاتحة)" autocomplete="off">
+                                <i class="fas fa-search" style="position:absolute; left:18px; top:50%; transform:translateY(-50%); color:var(--text-muted)"></i>
+                            </div>
+                            <div class="dropdown-list" id="surahDropdown">
+                                <!-- JS populated -->
+                            </div>
+                            <input type="hidden" id="selectedSurahId">
+                            <input type="hidden" id="maxAyahs">
+                        </div>
+
+                        <div class="select-row">
+                            <div class="form-group">
+                                <label class="label-text">من الآية</label>
+                                <input type="number" id="ayahFrom" class="input-box" value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="label-text">إلى الآية</label>
+                                <input type="number" id="ayahTo" class="input-box" value="3" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Visuals & Audio -->
+                    <div class="card">
+                        <div class="card-title">
+                            <div class="title-left">
+                                <i class="fas fa-wand-magic-sparkles"></i>
+                                <span>التنسيق والمؤثرات</span>
+                            </div>
+                            <button type="button" class="btn-random-action" id="randomBgBtn">
+                                <i class="fas fa-shuffle"></i>
+                                <span>خلفية عشوائية</span>
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label-text">خلفية الفيديو</label>
+                            <div class="thumb-grid" id="visualsGrid">
+                                <!-- JS populated -->
+                            </div>
+                            <div class="verse-bg-panel" id="verseBgPanel">
+                                <div class="verse-bg-header">
+                                    <span>اختيار خلفية لكل آية</span>
+                                    <span id="verseBgHint">الوضع الحالي: عشوائي</span>
+                                </div>
+                                <div class="verse-bg-slots" id="verseBgSlots"></div>
+                            </div>
+                            <button type="button" class="btn-show-all" id="showAllBgsBtn">عرض جميع فيديوهات الخلفية</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label-text">منصة النشر</label>
+                            <div class="format-row">
+                                <div class="format-card active" data-preset="youtube_shorts" data-format="youtube_shorts">
+                                    <div class="format-icon"><i class="fab fa-youtube"></i></div>
+                                    <div class="format-info">
+                                        <span class="format-name">Shorts</span>
+                                        <span class="format-desc">1080x1920</span>
+                                    </div>
+                                </div>
+                                <div class="format-card" data-preset="instagram_reels" data-format="instagram_reels">
+                                    <div class="format-icon"><i class="fab fa-instagram"></i></div>
+                                    <div class="format-info">
+                                        <span class="format-name">Reels</span>
+                                        <span class="format-desc">Safe bottom</span>
+                                    </div>
+                                </div>
+                                <div class="format-card" data-preset="tiktok" data-format="tiktok">
+                                    <div class="format-icon"><i class="fab fa-tiktok"></i></div>
+                                    <div class="format-info">
+                                        <span class="format-name">TikTok</span>
+                                        <span class="format-desc">Safe right</span>
+                                    </div>
+                                </div>
+                                <div class="format-card" data-preset="youtube_landscape" data-format="youtube_landscape">
+                                    <div class="format-icon"><i class="fas fa-tv"></i></div>
+                                    <div class="format-info">
+                                        <span class="format-name">YouTube</span>
+                                        <span class="format-desc">1920x1080</span>
+                                    </div>
+                                </div>
+                                <div class="format-card" data-preset="square" data-format="square">
+                                    <div class="format-icon"><i class="far fa-square"></i></div>
+                                    <div class="format-info">
+                                        <span class="format-name">Square</span>
+                                        <span class="format-desc">1080x1080</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedFormat" value="youtube_shorts">
+                            <input type="hidden" id="selectedPreset" value="youtube_shorts">
+                        </div>
+
+                        <div class="form-group custom-select" id="bgAudioSelectContainer">
+                            <label class="label-text">الصوت الخلفي (اختياري)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <div style="position: relative; flex: 1;">
+                                    <div id="bgAudioSelectBox" class="input-box" style="width: 100%; display: flex; align-items: center; cursor: pointer; justify-content: space-between; height: 48px; box-sizing: border-box;">
+                                        <span id="bgAudioSelectText">بدون صوت خلفي</span>
+                                        <i class="fas fa-chevron-down" style="color:var(--text-muted); font-size: 0.8rem;"></i>
+                                    </div>
+                                    <div class="dropdown-list" id="bgAudioDropdown" style="top: 55px; width: 100%;">
+                                        <div class="dropdown-item active" onclick="selectBgAudio('', 'بدون صوت خلفي', this)">
+                                            <span>بدون صوت خلفي</span>
+                                        </div>
+                                        <!-- JS populated -->
+                                    </div>
+                                    <input type="hidden" id="bgAudioSelect" value="">
+                                </div>
+                                <button type="button" id="previewBgAudioBtn" class="secondary-btn" style="padding: 0; border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" title="معاينة الصوت الخلفي">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="volume-control">
+                                <i class="fas fa-volume-low"></i>
+                                <input type="range" id="bgVolume" class="slider" min="0" max="100" value="15">
+                                <i class="fas fa-volume-high"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="generate-btn">
+                        <i class="fas fa-bolt"></i>
+                        <span>إنشاء الفيديو الآن</span>
+                    </button>
+
+                    <div class="actions-row">
+                        <button type="button" id="cleanFilesBtn" class="secondary-btn clean-btn">
+                            <i class="fas fa-broom"></i>
+                            <span>تفريغ الذاكرة المؤقتة</span>
+                        </button>
+                        <button type="button" class="secondary-btn" onclick="window.open('/outputs')">
+                            <i class="fas fa-folder-open"></i>
+                            <span>مجلد المخرجات</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Panel: Preview -->
+            <div class="preview-section">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="status-badge">
+                            <span class="status-dot"></span>
+                            <span style="font-weight: 800; font-size: 0.8rem; color: var(--success); letter-spacing: 1px;">LIVE STUDIO</span>
+                        </div>
+                        <div class="preview-controls">
+                        </div>
+                    </div>
+
+                    <div class="video-viewport">
+                        <div class="aspect-ratio-container format-youtube_shorts" id="previewContainer">
+                            <div class="empty-preview" id="emptyPreview">
+                                <i class="fas fa-film"></i>
+                                <p>سيظهر عرض الفيديو هنا بعد اكتمال عملية التوليد.</p>
+                            </div>
+                            <video id="resultVideo" class="result-video" controls></video>
+
+                            <div class="progress-overlay" id="progressOverlay">
+                                <div class="progress-header">
+                                    <span id="progressMsg">جاري البدء...</span>
+                                    <span id="progressPercent">0%</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" id="progressBar"></div>
+                                </div>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 5px;">يرجى عدم إغلاق البرنامج أثناء المعالجة</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="seo-card hidden" id="seoCard">
+                        <div class="card-title" style="margin-bottom: 1rem;">
+                            <div class="title-left">
+                                <i class="fas fa-hashtag"></i>
+                                <span>بيانات نشر يوتيوب (SEO)</span>
+                            </div>
+                        </div>
+                        <div class="seo-row">
+                            <label>العنوان العربي</label>
+                            <div class="seo-value" id="seoTitleAr">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>العنوان الإنجليزي</label>
+                            <div class="seo-value" id="seoTitleEn">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>بدائل العناوين</label>
+                            <div class="seo-value" id="seoTitleVariants">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>جملة افتتاحية جذابة</label>
+                            <div class="seo-value" id="seoHook">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>الوصف العربي</label>
+                            <div class="seo-value" id="seoDescAr">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>الوصف الإنجليزي</label>
+                            <div class="seo-value" id="seoDescEn">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>الهاشتاجات</label>
+                            <div class="seo-value" id="seoHashtags">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>الكلمات المفتاحية</label>
+                            <div class="seo-value" id="seoKeywords">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>وسوم الرفع</label>
+                            <div class="seo-value" id="seoUploadTags">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>التعليق المثبت</label>
+                            <div class="seo-value" id="seoPinnedComment">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>نص الصورة المصغرة</label>
+                            <div class="seo-value" id="seoThumbnailText">-</div>
+                        </div>
+                        <div class="seo-row">
+                            <label>نصائح زيادة المشاهدة</label>
+                            <div class="seo-value" id="seoRetentionTips">-</div>
+                        </div>
+                        <div class="seo-actions">
+                            <button class="seo-btn" id="copySeoTitleBtn" type="button">نسخ العنوانين</button>
+                            <button class="seo-btn" id="copySeoDescBtn" type="button">نسخ الوصفين</button>
+                            <button class="seo-btn" id="copySeoTagsBtn" type="button">نسخ الهاشتاجات</button>
+                            <button class="seo-btn" id="copySeoKeywordsBtn" type="button">نسخ الكلمات المفتاحية</button>
+                            <button class="seo-btn" id="copySeoUploadTagsBtn" type="button">نسخ وسوم الرفع</button>
+                            <button class="seo-btn" id="copySeoCommentBtn" type="button">نسخ التعليق المثبت</button>
+                            <button class="seo-btn" id="openSeoTxtBtn" type="button">فتح ملف youtube.txt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Library Removed -->
+
+    </main>
+
+    <!-- All Backgrounds Modal -->
+    <div class="modal" id="allBgsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>جميع فيديوهات الخلفية</h3>
+                <i class="fas fa-times close-modal" id="closeBgsModal"></i>
+            </div>
+            <div class="modal-body">
+                <div class="all-visuals-grid" id="allVisualsGrid">
+                    <!-- JS populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Alert -->
+    <div id="globalAlert" class="alert-box">
+        <i id="alertIcon" class="fas fa-info-circle"></i>
+        <span id="alertMsg"></span>
+    </div>
+
+    <script>
+        // Handle direct file:// execution
+        const API_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : '';
+        
+        // State
+        let selectedReciter = null;
+        let selectedBg = null;
+        let verseBackgrounds = [];
+        let activeVerseBgIndex = 0;
+        let allSurahs = [];
+        let availableBgs = [];
+        let bgAudioPreview = null;
+        let reciterPreview = null;
+        let seoTextFileName = null;
+
+        // Elements
+        const recitersList = document.getElementById('recitersList');
+        const surahSearch = document.getElementById('surahSearch');
+        const surahDropdown = document.getElementById('surahDropdown');
+        const visualsGrid = document.getElementById('visualsGrid');
+        const allVisualsGrid = document.getElementById('allVisualsGrid');
+        const verseBgSlots = document.getElementById('verseBgSlots');
+        const verseBgHint = document.getElementById('verseBgHint');
+        const bgAudioSelect = document.getElementById('bgAudioSelect');
+        const previewBgAudioBtn = document.getElementById('previewBgAudioBtn');
+        const generatorForm = document.getElementById('generatorForm');
+        const progressOverlay = document.getElementById('progressOverlay');
+        const progressBar = document.getElementById('progressBar');
+        const progressMsg = document.getElementById('progressMsg');
+        const progressPercent = document.getElementById('progressPercent');
+        const resultVideo = document.getElementById('resultVideo');
+        const emptyPreview = document.getElementById('emptyPreview');
+        const submitBtn = document.getElementById('submitBtn');
+        const allBgsModal = document.getElementById('allBgsModal');
+        const seoCard = document.getElementById('seoCard');
+        const seoTitleAr = document.getElementById('seoTitleAr');
+        const seoTitleEn = document.getElementById('seoTitleEn');
+        const seoDescAr = document.getElementById('seoDescAr');
+        const seoDescEn = document.getElementById('seoDescEn');
+        const seoHashtags = document.getElementById('seoHashtags');
+        const seoKeywords = document.getElementById('seoKeywords');
+        const seoTitleVariants = document.getElementById('seoTitleVariants');
+        const seoHook = document.getElementById('seoHook');
+        const seoUploadTags = document.getElementById('seoUploadTags');
+        const seoPinnedComment = document.getElementById('seoPinnedComment');
+        const seoThumbnailText = document.getElementById('seoThumbnailText');
+        const seoRetentionTips = document.getElementById('seoRetentionTips');
+
+        // View Switching
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetView = link.getAttribute('data-view');
+                if(!targetView) return;
+
+                // Update active link
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Update view sections
+                document.querySelectorAll('.view-section').forEach(view => {
+                    view.classList.remove('active');
+                });
+                const targetEl = document.getElementById(`view-${targetView}`);
+                if(targetEl) targetEl.classList.add('active');
+            });
+        });
+
+        // Initialize
+        async function init() {
+            loadReciters();
+            loadSurahs();
+            loadBackgrounds();
+            loadBgAudio();
+            
+            // Random Scripture Logic
+            document.getElementById('randomScriptureBtn').onclick = pickRandomScripture;
+            
+            // Random BG Button
+            document.getElementById('randomBgBtn').onclick = () => {
+                const randomItem = document.querySelector('.thumb-item[data-random="true"]');
+                if (randomItem) randomItem.click();
+            };
+
+            // Modal Logic
+            document.getElementById('showAllBgsBtn').onclick = () => allBgsModal.classList.add('show');
+            document.getElementById('closeBgsModal').onclick = () => allBgsModal.classList.remove('show');
+            window.onclick = (e) => { if (e.target == allBgsModal) allBgsModal.classList.remove('show'); };
+
+            ['ayahFrom', 'ayahTo'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.addEventListener('input', syncVerseBackgroundSlots);
+            });
+        }
+
+        // --- Data Loading ---
+
+        async function loadReciters() {
+            try {
+                const res = await fetch(`${API_BASE}/api/reciters`);
+                const data = await res.json();
+                if (data.success) {
+                    recitersList.innerHTML = '';
+
+                    data.data.forEach(reciter => {
+                        const card = document.createElement('div');
+                        card.className = 'reciter-card';
+                        card.innerHTML = `
+                            <div class="avatar-container" style="display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--text-muted);transition:0.3s;">
+                                <i class="fas fa-microphone-lines"></i>
+                                <div class="preview-mini-btn" title="معاينة الصوت">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <span>${reciter.name}</span>
+                        `;
+                        
+                        card.addEventListener('click', () => {
+                            document.querySelectorAll('.reciter-card').forEach(c => {
+                                c.classList.remove('active');
+                                c.querySelector('.avatar-container').style.color = 'var(--text-muted)';
+                            });
+                            card.classList.add('active');
+                            card.querySelector('.avatar-container').style.color = 'var(--primary)';
+                            selectedReciter = reciter.subfolder;
+                        });
+
+                        const previewBtn = card.querySelector('.preview-mini-btn');
+                        previewBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            toggleReciterPreview(reciter.preview_url, previewBtn);
+                        });
+
+                        recitersList.appendChild(card);
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadSurahs() {
+            try {
+                const res = await fetch(`${API_BASE}/api/surahs`);
+                const data = await res.json();
+                if (data.success) {
+                    allSurahs = data.data;
+                    renderSurahs(allSurahs);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadBackgrounds() {
+            try {
+                const res = await fetch(`${API_BASE}/api/backgrounds`);
+                const data = await res.json();
+                if (data.success) {
+                    availableBgs = data.data;
+                    visualsGrid.innerHTML = '';
+                    allVisualsGrid.innerHTML = '';
+                    
+                    // Add "Random" item
+                    const createRandomItem = () => {
+                        const item = document.createElement('div');
+                        item.className = 'thumb-item active';
+                        item.dataset.random = "true";
+                        item.innerHTML = `
+                            <div class="thumb-placeholder" style="display:flex;align-items:center;justify-content:center;background:var(--bg-dark);font-size:1.5rem;color:var(--primary)"><i class="fas fa-dice"></i></div>
+                            <div class="thumb-overlay">
+                                <i class="fas fa-shuffle"></i>
+                                <span>عشوائي</span>
+                            </div>
+                        `;
+                        item.onclick = () => selectBg(null, item);
+                        return item;
+                    };
+                    
+                    visualsGrid.appendChild(createRandomItem());
+
+                    // Add thumbnails
+                    availableBgs.forEach((bg, idx) => {
+                        const createItem = () => {
+                            const item = document.createElement('div');
+                            item.className = 'thumb-item';
+                            item.dataset.path = bg.path;
+                            item.innerHTML = `
+                                <video src="${API_BASE}/api/vision/${bg.name}" muted loop preload="none" poster="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231c1c26'/%3E%3Ctext x='50' y='50' dominant-baseline='central' text-anchor='middle' font-size='30' fill='%23f2ca4b'%3E🎬%3C/text%3E%3C/svg%3E"></video>
+                                <div class="thumb-overlay">
+                                    <i class="fas fa-check"></i>
+                                    <span>${bg.name}</span>
+                                </div>
+                            `;
+                            item.onmouseenter = () => { const v = item.querySelector('video'); v.play().catch(()=>{}); };
+                            item.onmouseleave = () => { const v = item.querySelector('video'); v.pause(); v.currentTime = 0; };
+                            item.onclick = () => {
+                                selectBg(bg.path, item);
+                            };
+                            return item;
+                        };
+                        
+                        if (idx < 5) visualsGrid.appendChild(createItem());
+                        allVisualsGrid.appendChild(createItem());
+                    });
+                    syncVerseBackgroundSlots();
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadBgAudio() {
+            try {
+                const res = await fetch(`${API_BASE}/api/background-audio`);
+                const data = await res.json();
+                if (data.success) {
+                    const dropdown = document.getElementById('bgAudioDropdown');
+                    data.data.forEach(audio => {
+                        const item = document.createElement('div');
+                        item.className = 'dropdown-item';
+                        item.innerHTML = `<span>${audio.name.split('.')[0]}</span>`;
+                        item.onclick = (e) => selectBgAudio(audio.name, audio.name.split('.')[0], e.currentTarget);
+                        dropdown.appendChild(item);
+                    });
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function selectBgAudio(value, name, targetElement) {
+            document.getElementById('bgAudioSelect').value = value;
+            document.getElementById('bgAudioSelectText').innerText = name;
+            document.getElementById('bgAudioDropdown').classList.remove('show');
+            
+            document.querySelectorAll('#bgAudioDropdown .dropdown-item').forEach(item => item.classList.remove('active'));
+            if(targetElement) {
+                targetElement.classList.add('active');
+            } else {
+                document.querySelector('#bgAudioDropdown .dropdown-item:first-child').classList.add('active');
+            }
+
+            if (bgAudioPreview) {
+                bgAudioPreview.pause();
+                const btn = document.getElementById('previewBgAudioBtn');
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                btn.style.color = '';
+                btn.style.borderColor = '';
+            }
+        }
+
+        const bgAudioSelectBox = document.getElementById('bgAudioSelectBox');
+        if(bgAudioSelectBox) {
+            bgAudioSelectBox.onclick = () => {
+                document.getElementById('bgAudioDropdown').classList.toggle('show');
+            };
+        }
+
+        // --- UI Interactions ---
+
+        function getVerseRange() {
+            const from = parseInt(document.getElementById('ayahFrom').value, 10) || 1;
+            const to = parseInt(document.getElementById('ayahTo').value, 10) || from;
+            return { from, to: Math.max(from, to), count: Math.max(1, Math.max(from, to) - from + 1) };
+        }
+
+        function getBgDisplayName(path) {
+            if (!path) return 'عشوائي';
+            const match = availableBgs.find(bg => bg.path === path);
+            const name = match ? match.name : path.split(/[\\/]/).pop();
+            return name.replace(/\.[^.]+$/, '');
+        }
+
+        function updateSelectedBgFromSlots() {
+            const hasManualSelection = verseBackgrounds.some(Boolean);
+            selectedBg = hasManualSelection ? verseBackgrounds.slice() : null;
+        }
+
+        function updateBgActiveStates() {
+            const selectedPaths = new Set(verseBackgrounds.filter(Boolean));
+            document.querySelectorAll('.thumb-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.random === 'true' && selectedPaths.size === 0) {
+                    item.classList.add('active');
+                }
+                if (item.dataset.path && selectedPaths.has(item.dataset.path)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function renderVerseBackgroundSlots() {
+            if (!verseBgSlots) return;
+
+            const { from, count } = getVerseRange();
+            verseBgSlots.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const slot = document.createElement('div');
+                const path = verseBackgrounds[i] || null;
+                slot.className = `verse-bg-slot ${i === activeVerseBgIndex ? 'active' : ''} ${path ? 'filled' : ''}`;
+                slot.dataset.index = i;
+                slot.innerHTML = `
+                    <span class="verse-bg-label">الآية ${from + i}</span>
+                    <span class="verse-bg-name">${path ? getBgDisplayName(path) : 'اختر فيديو لهذه الآية'}</span>
+                `;
+                slot.onclick = () => {
+                    activeVerseBgIndex = i;
+                    renderVerseBackgroundSlots();
+                    showAlert(`اختر فيديو خلفية للآية ${from + i}`, 'info');
+                };
+                verseBgSlots.appendChild(slot);
+            }
+
+            const filled = verseBackgrounds.filter(Boolean).length;
+            verseBgHint.textContent = filled
+                ? `تم اختيار ${filled}/${count} فيديو`
+                : 'الوضع الحالي: عشوائي';
+        }
+
+        function syncVerseBackgroundSlots() {
+            const { count } = getVerseRange();
+            verseBackgrounds = verseBackgrounds.slice(0, count);
+            while (verseBackgrounds.length < count) verseBackgrounds.push(null);
+            if (activeVerseBgIndex >= count) activeVerseBgIndex = count - 1;
+            if (activeVerseBgIndex < 0) activeVerseBgIndex = 0;
+            updateSelectedBgFromSlots();
+            renderVerseBackgroundSlots();
+            updateBgActiveStates();
+        }
+
+        function setVerseBackground(path) {
+            syncVerseBackgroundSlots();
+            verseBackgrounds[activeVerseBgIndex] = path;
+            updateSelectedBgFromSlots();
+
+            const { count } = getVerseRange();
+            const nextEmpty = verseBackgrounds.findIndex((item, idx) => !item && idx > activeVerseBgIndex);
+            if (nextEmpty !== -1) {
+                activeVerseBgIndex = nextEmpty;
+            } else if (activeVerseBgIndex < count - 1) {
+                activeVerseBgIndex += 1;
+            }
+
+            renderVerseBackgroundSlots();
+            updateBgActiveStates();
+
+            if (verseBackgrounds.every(Boolean)) {
+                allBgsModal.classList.remove('show');
+                showAlert('تم اختيار فيديو لكل آية', 'success');
+            }
+        }
+
+        function selectBg(path, element) {
+            if (path) {
+                setVerseBackground(path);
+            } else {
+                verseBackgrounds = [];
+                activeVerseBgIndex = 0;
+                selectedBg = null;
+                syncVerseBackgroundSlots();
+                showAlert('تم تفعيل اختيار الخلفيات العشوائي', 'success');
+            }
+        }
+
+        function renderSurahs(list) {
+            surahDropdown.innerHTML = '';
+            list.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.innerHTML = `<span>${s.number}. ${s.name}</span><span class="ayah-count">${s.numberOfAyahs} آية</span>`;
+                item.onclick = () => selectSurah(s);
+                surahDropdown.appendChild(item);
+            });
+        }
+
+        function selectSurah(s) {
+            surahSearch.value = `${s.number}. ${s.name}`;
+            document.getElementById('selectedSurahId').value = s.number;
+            document.getElementById('maxAyahs').value = s.numberOfAyahs;
+            document.getElementById('ayahTo').max = s.numberOfAyahs;
+            document.getElementById('ayahFrom').max = s.numberOfAyahs;
+            surahDropdown.classList.remove('show');
+            syncVerseBackgroundSlots();
+        }
+
+        function pickRandomScripture() {
+            if (allSurahs.length === 0) return;
+            const surah = allSurahs[Math.floor(Math.random() * allSurahs.length)];
+            selectSurah(surah);
+            
+            const max = surah.numberOfAyahs;
+            const from = Math.max(1, Math.floor(Math.random() * (max - 2)));
+            const count = Math.floor(Math.random() * 4) + 1; // 1-5 ayahs
+            const to = Math.min(max, from + count);
+            
+            document.getElementById('ayahFrom').value = from;
+            document.getElementById('ayahTo').value = to;
+            syncVerseBackgroundSlots();
+            
+            showAlert(`تم اختيار سورة ${surah.name}، الآيات ${from}-${to}`, 'success');
+        }
+
+        surahSearch.onfocus = () => surahDropdown.classList.add('show');
+        surahSearch.oninput = (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allSurahs.filter(s => 
+                s.name.includes(query) || 
+                s.englishName.toLowerCase().includes(query) || 
+                s.number.toString() === query
+            );
+            renderSurahs(filtered);
+        };
+
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('surahSelectContainer').contains(e.target)) {
+                surahDropdown.classList.remove('show');
+            }
+            if (document.getElementById('bgAudioSelectContainer') && !document.getElementById('bgAudioSelectContainer').contains(e.target)) {
+                const bgDropdown = document.getElementById('bgAudioDropdown');
+                if(bgDropdown) bgDropdown.classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('.format-card').forEach(card => {
+            card.onclick = () => {
+                document.querySelectorAll('.format-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                const format = card.dataset.format;
+                const preset = card.dataset.preset || format;
+                document.getElementById('selectedFormat').value = format;
+                document.getElementById('selectedPreset').value = preset;
+                
+                const previewContainer = document.getElementById('previewContainer');
+                if (previewContainer) {
+                    previewContainer.className = 'aspect-ratio-container format-' + format;
+                }
+            };
+        });
+
+        // --- Audio Previews ---
+
+        function toggleReciterPreview(url, btn) {
+            if (reciterPreview && reciterPreview.src === url) {
+                if (reciterPreview.paused) {
+                    reciterPreview.play();
+                    btn.classList.add('playing');
+                    btn.querySelector('i').className = 'fas fa-pause';
+                } else {
+                    reciterPreview.pause();
+                    btn.classList.remove('playing');
+                    btn.querySelector('i').className = 'fas fa-play';
+                }
+                return;
+            }
+
+            if (reciterPreview) {
+                reciterPreview.pause();
+                document.querySelectorAll('.preview-mini-btn').forEach(b => {
+                    b.classList.remove('playing');
+                    b.querySelector('i').className = 'fas fa-play';
+                });
+            }
+
+            reciterPreview = new Audio(url);
+            reciterPreview.play();
+            btn.classList.add('playing');
+            btn.querySelector('i').className = 'fas fa-pause';
+            
+            reciterPreview.onended = () => {
+                btn.classList.remove('playing');
+                btn.querySelector('i').className = 'fas fa-play';
+            };
+        }
+
+        // Background Audio Preview Logic
+        previewBgAudioBtn.addEventListener('click', () => {
+            const selectedAudio = bgAudioSelect.value;
+            if (!selectedAudio) {
+                const globalAlert = document.getElementById('globalAlert');
+                const alertMsg = document.getElementById('alertMsg');
+                const alertIcon = document.getElementById('alertIcon');
+                alertMsg.innerText = 'يرجى اختيار صوت خلفي أولاً';
+                alertIcon.className = 'fas fa-exclamation-circle';
+                globalAlert.className = 'alert-box alert-error show';
+                setTimeout(() => globalAlert.classList.remove('show'), 3000);
+                return;
+            }
+
+            const url = `${API_BASE}/api/background-audio/${selectedAudio}`;
+            
+            if (bgAudioPreview && bgAudioPreview.src === url) {
+                if (bgAudioPreview.paused) {
+                    bgAudioPreview.play();
+                    previewBgAudioBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    previewBgAudioBtn.style.color = 'var(--primary)';
+                    previewBgAudioBtn.style.borderColor = 'var(--primary)';
+                } else {
+                    bgAudioPreview.pause();
+                    previewBgAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    previewBgAudioBtn.style.color = '';
+                    previewBgAudioBtn.style.borderColor = '';
+                }
+                return;
+            }
+
+            if (bgAudioPreview) {
+                bgAudioPreview.pause();
+            }
+
+            bgAudioPreview = new Audio(url);
+            bgAudioPreview.volume = document.getElementById('bgVolume').value / 100;
+            bgAudioPreview.play();
+            previewBgAudioBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            previewBgAudioBtn.style.color = 'var(--primary)';
+            previewBgAudioBtn.style.borderColor = 'var(--primary)';
+            
+            bgAudioPreview.onended = () => {
+                previewBgAudioBtn.innerHTML = '<i class="fas fa-play"></i>';
+                previewBgAudioBtn.style.color = '';
+                previewBgAudioBtn.style.borderColor = '';
+            };
+        });
+
+        document.getElementById('bgVolume').addEventListener('input', (e) => {
+            if (bgAudioPreview && !bgAudioPreview.paused) {
+                bgAudioPreview.volume = e.target.value / 100;
+            }
+        });
+        
+        // bgAudioSelect change logic moved to selectBgAudio
+
+        // --- Generation Logic ---
+
+        generatorForm.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const surah = document.getElementById('selectedSurahId').value;
+            const from = document.getElementById('ayahFrom').value;
+            const to = document.getElementById('ayahTo').value;
+            
+            if (!selectedReciter) return showAlert('يرجى اختيار قارئ أولاً', 'error');
+            if (!surah) return showAlert('يرجى اختيار سورة', 'error');
+
+            syncVerseBackgroundSlots();
+            if (verseBackgrounds.some(Boolean) && !verseBackgrounds.every(Boolean)) {
+                return showAlert('اختر فيديو لكل آية أو فعّل الخلفية العشوائية', 'error');
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div> جاري المعالجة...';
+            
+            emptyPreview.style.display = 'none';
+            resultVideo.classList.remove('active');
+            progressOverlay.classList.add('active');
+            resetSeoMetadata();
+            updateProgress(0, 'جاري بدء التوليد...');
+
+            try {
+                const res = await fetch(`${API_BASE}/api/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reciter_subfolder: selectedReciter,
+                        surah_number: surah,
+                        verse_from: from,
+                        verse_to: to,
+                        video_format: document.getElementById('selectedFormat').value,
+                        platform_preset: document.getElementById('selectedPreset').value,
+                        custom_backgrounds: selectedBg,
+                        background_audio: bgAudioSelect.value,
+                        bg_audio_volume: document.getElementById('bgVolume').value / 100
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    pollProgress();
+                } else {
+                    showAlert(data.error, 'error');
+                    resetSubmit();
+                }
+            } catch (err) {
+                showAlert('خطأ في الاتصال بالخادم', 'error');
+                resetSubmit();
+            }
+        };
+
+        async function pollProgress() {
+            try {
+                const res = await fetch(`${API_BASE}/api/progress`);
+                const data = await res.json();
+                
+                updateProgress(data.progress, data.message);
+                
+                if (data.status === 'completed') {
+                    progressOverlay.classList.remove('active');
+                    resultVideo.src = `${API_BASE}/downloads/${data.video_path}?t=${Date.now()}`;
+                    resultVideo.classList.add('active');
+                    seoTextFileName = data.seo_text_file || null;
+
+                    if (data.seo_data) {
+                        renderSeoMetadata(data.seo_data);
+                    } else {
+                        loadSeoMetadata(data.video_path);
+                    }
+
+                    showAlert('تم إنشاء الفيديو بنجاح! 🎉', 'success');
+                    resetSubmit();
+                } else if (data.status === 'error') {
+                    showAlert(data.message, 'error');
+                    resetSubmit();
+                } else {
+                    setTimeout(pollProgress, 1000);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function updateProgress(val, msg) {
+            progressBar.style.width = `${val}%`;
+            progressPercent.textContent = `${val}%`;
+            progressMsg.textContent = msg;
+        }
+
+        async function loadSeoMetadata(videoFile) {
+            try {
+                const res = await fetch(`${API_BASE}/api/seo/${encodeURIComponent(videoFile)}`);
+                const payload = await res.json();
+                if (payload.success && payload.data && payload.data.metadata) {
+                    renderSeoMetadata(payload.data.metadata);
+                }
+            } catch (err) {
+                console.error('SEO metadata load error:', err);
+            }
+        }
+
+        function renderSeoMetadata(metadata) {
+            if (!metadata) return;
+            const titleVariants = [
+                ...(Array.isArray(metadata.title_variants_ar) ? metadata.title_variants_ar : []),
+                ...(Array.isArray(metadata.title_variants_en) ? metadata.title_variants_en : [])
+            ];
+            const hooks = [metadata.hook_ar, metadata.hook_en].filter(Boolean);
+            const pinnedComments = [metadata.pinned_comment_ar, metadata.pinned_comment_en].filter(Boolean);
+            const thumbnailTexts = [metadata.thumbnail_text_ar, metadata.thumbnail_text_en].filter(Boolean);
+
+            seoTitleAr.textContent = metadata.title_ar || '-';
+            seoTitleEn.textContent = metadata.title_en || '-';
+            seoTitleVariants.textContent = titleVariants.length ? titleVariants.join('\n') : '-';
+            seoHook.textContent = hooks.length ? hooks.join('\n') : '-';
+            seoDescAr.textContent = metadata.description_ar || '-';
+            seoDescEn.textContent = metadata.description_en || '-';
+            seoHashtags.textContent = Array.isArray(metadata.hashtags) ? metadata.hashtags.join(' ') : '-';
+            seoKeywords.textContent = Array.isArray(metadata.keywords) ? metadata.keywords.join(', ') : '-';
+            seoUploadTags.textContent = Array.isArray(metadata.upload_tags) ? metadata.upload_tags.join(', ') : '-';
+            seoPinnedComment.textContent = pinnedComments.length ? pinnedComments.join('\n\n') : '-';
+            seoThumbnailText.textContent = thumbnailTexts.length ? thumbnailTexts.join('\n') : '-';
+            seoRetentionTips.textContent = Array.isArray(metadata.retention_tips) ? metadata.retention_tips.join('\n') : '-';
+            seoCard.classList.remove('hidden');
+        }
+
+        function resetSeoMetadata() {
+            seoTextFileName = null;
+            seoCard.classList.add('hidden');
+            seoTitleAr.textContent = '-';
+            seoTitleEn.textContent = '-';
+            seoDescAr.textContent = '-';
+            seoDescEn.textContent = '-';
+            seoHashtags.textContent = '-';
+            seoKeywords.textContent = '-';
+            seoTitleVariants.textContent = '-';
+            seoHook.textContent = '-';
+            seoUploadTags.textContent = '-';
+            seoPinnedComment.textContent = '-';
+            seoThumbnailText.textContent = '-';
+            seoRetentionTips.textContent = '-';
+        }
+
+        async function copyTextValue(value, successMsg) {
+            if (!value || value === '-') return;
+            try {
+                await navigator.clipboard.writeText(value);
+                showAlert(successMsg, 'success');
+            } catch (err) {
+                showAlert('فشل النسخ من المتصفح', 'error');
+            }
+        }
+
+        function resetSubmit() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-bolt"></i> <span>إنشاء الفيديو الآن</span>';
+        }
+
+        // Library Logic Removed
+        // Clean Files
+        document.getElementById('cleanFilesBtn').onclick = async () => {
+            if (!confirm('هل أنت متأكد من مسح جميع الملفات المؤقتة؟')) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/clean`, { method: 'POST' });
+                const data = await res.json();
+                showAlert(data.message, 'success');
+            } catch (err) { showAlert('خطأ في تنظيف الملفات', 'error'); }
+        };
+
+        document.getElementById('copySeoTitleBtn').onclick = () => {
+            copyTextValue(`${seoTitleAr.textContent}\n${seoTitleEn.textContent}`, 'تم نسخ العنوان');
+        };
+        document.getElementById('copySeoDescBtn').onclick = () => {
+            copyTextValue(`${seoDescAr.textContent}\n\n${seoDescEn.textContent}`, 'تم نسخ الوصف');
+        };
+        document.getElementById('copySeoTagsBtn').onclick = () => {
+            copyTextValue(seoHashtags.textContent, 'تم نسخ الهاشتاجات');
+        };
+        document.getElementById('copySeoKeywordsBtn').onclick = () => {
+            copyTextValue(seoKeywords.textContent, 'تم نسخ الكلمات المفتاحية');
+        };
+        document.getElementById('copySeoUploadTagsBtn').onclick = () => {
+            copyTextValue(seoUploadTags.textContent, 'تم نسخ وسوم الرفع');
+        };
+        document.getElementById('copySeoCommentBtn').onclick = () => {
+            copyTextValue(seoPinnedComment.textContent, 'تم نسخ التعليق المثبت');
+        };
+        document.getElementById('openSeoTxtBtn').onclick = () => {
+            if (!seoTextFileName) {
+                showAlert('ملف SEO النصي غير متاح بعد', 'info');
+                return;
+            }
+            window.open(`${API_BASE}/downloads/${encodeURIComponent(seoTextFileName)}`, '_blank');
+        };
+
+        // Alert Utility
+        function showAlert(msg, type = 'info') {
+            const alert = document.getElementById('globalAlert');
+            const icon = document.getElementById('alertIcon');
+            const text = document.getElementById('alertMsg');
+            
+            alert.className = `alert-box alert-${type} show`;
+            text.textContent = msg;
+            
+            const icons = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            icon.className = `fas ${icons[type]}`;
+            
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        }
+
+        init();
+    </script>
+</body>
+</html>

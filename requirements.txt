@@ -1,0 +1,11 @@
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+requests>=2.31.0
+Pillow>=10.1.0
+arabic-reshaper>=3.0.0
+python-bidi>=0.4.2
+pydub>=0.25.1
+numpy>=1.26.0
+openai-whisper
+torch
+gunicorn>=22.0.0

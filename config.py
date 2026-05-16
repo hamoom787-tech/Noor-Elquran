@@ -68,13 +68,13 @@ WHISPER_MODEL = os.getenv("WHISPER_MODEL", "base").strip() or "base"
 # Text overlay settings
 TEXT_COLOR = "white"
 TASHKEEL_COLOR = "#FFD700"  # Gold color for diacritics
-TEXT_FONT_SIZE = 43         # Reduced again to prevent word wrapping
-TEXT_FONT = "Traditional Arabic"  # Better font for Quranic text on Windows
+TEXT_FONT_SIZE = 58
+TEXT_FONT = os.getenv("TEXT_FONT", "Noto Naskh Arabic")
 TEXT_STROKE_COLOR = "black"
 TEXT_STROKE_WIDTH = 2       # Thinner stroke for Uthmani text
 TEXT_SHADOW = True
 TEXT_POSITION = "center"
-TRANSLATION_FONT_SIZE = 20  # Reduced again for better fit
+TRANSLATION_FONT_SIZE = 24
 
 # Background settings
 BACKGROUND_OPACITY = 0.3
